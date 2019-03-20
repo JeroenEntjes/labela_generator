@@ -1,0 +1,9 @@
+[flake8]
+# Ignoring
+ignore =
+       # D100: Missing module docstring
+       D100,
+       # E701: Multiple statements on one line
+       E701
+exclude = .git,__pycache__,alembic,tests,env,venv,build,scripts,
+max-complexity = 10
