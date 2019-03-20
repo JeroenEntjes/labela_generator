@@ -20,4 +20,4 @@ test
 .python-version
 htmlcov/
 !.flake8
-.idea
+.idea/
