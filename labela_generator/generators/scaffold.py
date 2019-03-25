@@ -1,13 +1,10 @@
-import os
 import click
 
-from labela_generator.generators.model import model_
+from labela_generator.generators.model import model
 
 
-@click.command()
-@click.option('-y', is_flag=True)
-@click.argument('module')
-def scaffold(module: str, y: bool):
+
+def scaffold(config, name: str, y: bool):
     """
     Generate a full scaffold of a module.
 
@@ -20,7 +17,6 @@ def scaffold(module: str, y: bool):
     Route
     Container
     """
-    click.echo("Generating scaffold for {module}".format(module=module))
+    click.echo("Generating scaffold for {module}".format(module=name))
 
-    path = os.getcwd()
-    model_(module, path, y)
+    model(config, name, y)

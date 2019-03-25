@@ -2,9 +2,8 @@ from setuptools import setup, find_packages
 
 
 requires = [
-    "flake8",
-    "wheel",
-    "click"
+    "click==7.0",
+    "mako==1.0.8"
 ]
 
 setup(
@@ -15,9 +14,9 @@ setup(
     url='',
     license='MIT',
     packages=find_packages(),
+    include_package_data=True,
     entry_points='''
     [console_scripts]
-    scaffold=labela_generator.generators.scaffold:scaffold
-    model=labela_generator.generators.model:model
+    lagen=labela_generator.generators.lagen:lagen
     '''
 )

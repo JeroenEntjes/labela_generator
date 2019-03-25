@@ -19,5 +19,5 @@ test
 *.ini
 .python-version
 htmlcov/
-!.flake8
+.flake8
 .idea/

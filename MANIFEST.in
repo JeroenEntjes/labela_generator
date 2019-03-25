@@ -1,0 +1,3 @@
+include labela_generator/templates/models/*.mako
+include labela_generator/templates/repositories/*.mako
+include labela_generator/templates/services/*.mako

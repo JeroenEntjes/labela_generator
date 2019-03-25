@@ -1,25 +1,20 @@
-import os
+from os import path
 
 import click
 
-from labela_generator.helpers.project_structure import find_paths
+from labela_generator.templates.generate import file_from_template
+from labela_generator.templates.models import model_template_path
 
 
-@click.command()
-@click.option('-y', is_flag=True)
-@click.argument('name')
-def model(name: str, y: bool):
-    """
-    Generate model
-    """
-    model_(name, y)
+file_name = 'models.py.mako'
 
 
-def model_(name: str, y: bool = False):
-    models_path, repositories_path, services_path = find_paths(name)
-    if os.path.isfile(models_path):
+def model(config, name: str, y: bool):
+    paths = config.find_paths(name, only=['models'])
+    models_path = paths['models']
+    if path.isfile(models_path):
         #TODO: Exception raising
-        print('file already exists')
+        print('Exception: File already exists')
         return
 
     if y or click.confirm(
@@ -27,4 +22,7 @@ def model_(name: str, y: bool = False):
             full_path=models_path
         )
     ):
-        new_model = open(models_path, 'w')
+        template_location = path.join(model_template_path, file_name)
+        file_from_template(template_location, models_path,
+                           project=config.project_name(),
+                           class_name=name.capitalize())
