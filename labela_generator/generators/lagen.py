@@ -1,24 +1,20 @@
 import click
 
-from labela_generator.generators.model import model
-from labela_generator.generators.scaffold import scaffold
-from labela_generator.helpers.project_structure import Config
+from labela_generator.generators.labela_generator import LabelAGenerator
+from labela_generator.helpers.constants import Arguments, ConfigOptions
+from labela_generator.helpers.config import Config
 
 
 @click.command()
-@click.option('-c')
-@click.option('-y', is_flag=True)
-@click.argument('component')
-@click.argument('name')
-def lagen(component: str, name: str, y: bool, c: str):
+# TODO: Add -h and --help functions
+@click.option(Arguments.CONFIGFILE.value)
+@click.option(Arguments.PROMPTYES.value, is_flag=True)
+@click.argument(Arguments.COMPONENT.value)
+@click.argument(Arguments.NAME.value)
+def lagen(component: str, name: str, y: bool, c: str = None) -> None:
+    if not c:
+        c = ConfigOptions.FILENAME.value
+    config = Config(ini_file=c, resource_name=name)
+    generator = LabelAGenerator(config)
 
-    config = Config(ini_file=c)
-
-    #TODO: No magic strings
-    if component == 'scaffold':
-        return scaffold(config, name, y)
-    elif component == 'models':
-        return model(config, name, y)
-
-    #TODO: Exception
-    print('Exception: Unknown operation')
+    generator.generate(component, y)

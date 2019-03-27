@@ -5,5 +5,7 @@ ignore =
        D100,
        # E701: Multiple statements on one line
        E701
+       # E401: Multiple imports on one line
+       E401
 exclude = .git,__pycache__,alembic,tests,env,venv,build,scripts,
 max-complexity = 10

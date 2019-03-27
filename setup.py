@@ -3,7 +3,9 @@ from setuptools import setup, find_packages
 
 requires = [
     "click==7.0",
-    "mako==1.0.8"
+    "dependency-injector==3.14.4",
+    "mako==1.0.8",
+    "pyramid==1.10.2"
 ]
 
 setup(
