@@ -1,3 +1,6 @@
 include labela_generator/templates/models/*.mako
 include labela_generator/templates/repositories/*.mako
 include labela_generator/templates/services/*.mako
+include labela_generator/templates/views/*.mako
+include labela_generator/templates/containers/*.mako
+include labela_generator/templates/routes/*.mako
