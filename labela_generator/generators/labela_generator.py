@@ -2,7 +2,7 @@ from typing import Dict, List
 
 import click
 
-from labela_generator import generators
+from labela_generator.generators import generators
 from labela_generator.helpers.constants import ComponentsContains
 from labela_generator.helpers.config import Config
 
@@ -18,9 +18,12 @@ class LabelAGenerator:
             print('Exception: Unknown operation')
             return
 
-        component_paths = self._generate_paths(components)
+        components_and_paths = self._generate_paths(components)
+        if not components_and_paths:
+            click.echo('Nothing to generate')
+            return
         if y or click.confirm("Continue?"):
-            self._generate_files(components, component_paths)
+            self._generate_files(components_and_paths)
         else:
             click.echo('Cancelled by user')
             return
@@ -29,10 +32,12 @@ class LabelAGenerator:
         component_paths = self._config.find_components_path(
             components=components
         )
-        for component_path in component_paths:
-            if self._config.find_file(path=component_path):
+        components_to_add = {}
+        for component, component_path in component_paths.items():
+            if self._config.find_file(component_path):
                 # TODO: Exception raising / file replace?
-                print('Exception: File already exists, skipping...')
+                print('Exception: File {path} already exists, '
+                      'skipping...'.format(path=component_path))
                 continue
 
             click.echo(
@@ -40,9 +45,10 @@ class LabelAGenerator:
                     full_path=component_path
                 )
             )
-        return component_paths
+            components_to_add[component] = component_path
+        return components_to_add
 
-    def _generate_files(self, components: List, component_paths: Dict) -> None:
-        for component in components:
+    def _generate_files(self, components_and_paths: Dict) -> None:
+        for component, path in components_and_paths.items():
             generator = getattr(generators, component)
-            generator(self._config, component_paths[component])
+            generator(self._config, components_and_paths[component])

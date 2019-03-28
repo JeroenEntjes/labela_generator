@@ -18,7 +18,7 @@ class Config:
         self._config = configparser.ConfigParser()
         self._config.read(self._config_ini)
 
-        self.component_folder = {}
+        self.component_folders = {}
 
     def get_section_option(self, section: str, option: str) -> str:
         if not self._config.has_section(section):
@@ -46,7 +46,9 @@ class Config:
             folder = Config.find_component(root, component)
             if not folder:
                 # TODO: Exception?
-                print('Exception: Cannot locate {component} folder!')
+                print('Exception: Cannot locate {component} folder!'.format(
+                    component=component)
+                )
                 sys.exit(1)
             self.set_component(component, folder)
             paths[component] = os.path.join(
@@ -58,29 +60,33 @@ class Config:
         return self._resource_name
 
     def set_component(self, component: str, folder: str) -> None:
-        self.component_folder[component] = folder
+        self.component_folders[component] = folder
 
     def get_component(self, component: str):
-        if not self.component_folder[component]:
+        if not self.component_folders.get(component):
             self.find_components_path([component])
-        return self.component_folder[component]
+        return self.component_folders[component]
 
     @staticmethod
-    def find_file(root: str = None, path: str = None, resource_name: str = None
+    def find_file(
+            resource_name: str, root: str = '', folder_path: str = ''
     ) -> Optional[str]:
+        if resource_name[-3:] == '.py':
+            resource_name = resource_name[:-3]
+
         file_name = resource_name + '.py'
-        file_location = os.path.join(root, path, file_name)
-        if path.isfile(file_location):
+        file_location = os.path.join(root, folder_path, file_name)
+        if os.path.isfile(file_location):
             return file_location
 
         file_name = resource_name + 's.py'
-        file_location = os.path.join(root, path, file_name)
-        if path.isfile(file_location):
+        file_location = os.path.join(root, folder_path, file_name)
+        if os.path.isfile(file_location):
             return file_location
 
         file_name = resource_name[:-1] + 'ies.py'
-        file_location = os.path.join(root, path, file_name)
-        if path.isfile(file_location):
+        file_location = os.path.join(root, folder_path, file_name)
+        if os.path.isfile(file_location):
             return file_location
 
         return None
@@ -90,17 +96,17 @@ class Config:
         folder = component
         path = os.path.join(root, folder)
         if os.path.isdir(path):
-            return component
+            return folder
 
         folder = component + 's'
         path = os.path.join(root, folder)
         if os.path.isdir(path):
-            return component
+            return folder
 
         folder = component[:-1] + 'ies'
         path = os.path.join(root, folder)
         if os.path.isdir(path):
-            return component
+            return folder
 
         return None
 

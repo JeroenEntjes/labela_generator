@@ -47,8 +47,9 @@ class ${model_class_name}View:
     @view_config(route_name='api.${model_name}', request_method='PATCH')
     def update(self) -> Dict:
         ${model_name}_id = self.request.matchdict['id']
+        ${model_name} = self._service.get(${model_name}_id)
         params = self.request.json_body
-        ${model_name} = self._service.update(${model_name}_id)
+        ${model_name} = self._service.update(${model_name}, **params)
 
         return {
             'success': True,

@@ -1,10 +1,9 @@
 """
 BaseRepository from template
 """
-from typing import Union
-from uuid import UUID
+from datetime import datetime
 
-from sqlalchemy.sql.expression import desc, asc
+from sqlalchemy.sql.expression import desc, asc, or_
 
 
 class BaseRepository:
@@ -30,10 +29,10 @@ class BaseRepository:
         """
         Update object and return it
         :param object_: Object to be updated
-        :param data: Model attributes and their values dictionary
+        :param kwargs: Model attributes and their values dictionary
         :return: Updated object
         """
-        for attribute, value in data.items():
+        for attribute, value in kwargs.items():
             if hasattr(object_, attribute):
                 setattr(object_, attribute, value)
         self.session.add(object_)
@@ -66,7 +65,7 @@ class BaseRepository:
         """
         to_delete = self.get(id_)
         if to_delete:
-            self.update(to_delete, deleted=utc_aware_datetime_now())
+            self.update(to_delete, deleted=datetime.now())
 
     def _find(self, order=None, **kwargs):
         """

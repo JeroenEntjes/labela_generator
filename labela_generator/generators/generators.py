@@ -9,13 +9,12 @@ from labela_generator.templates.generate import (
 )
 from labela_generator.templates.models import model_template_path
 from labela_generator.templates.repositories import repository_template_path
+from labela_generator.templates.routes import routes_template_path
 from labela_generator.templates.services import service_template_path
-from labela_generator.templates.views import (
-    view_template_path, routes_template_path
-)
+from labela_generator.templates.views import view_template_path
 
 
-def model(config, model_path: str) -> None:
+def model(config: Config, model_path: str) -> None:
     template_location = path.join(
         model_template_path, TemplateName.MODEL.value
     )
@@ -28,7 +27,7 @@ def model(config, model_path: str) -> None:
     )
 
 
-def service(config, service_path: str) -> None:
+def service(config: Config, service_path: str) -> None:
     template_location = path.join(
         service_template_path, TemplateName.SERVICE.value
     )
@@ -37,15 +36,27 @@ def service(config, service_path: str) -> None:
     file_from_template(
         template_location, service_path,
         services_folder=services_folder,
-        repository_template_path=repositories_folder,
+        repositories_folder=repositories_folder,
         project=config.project_name(),
+        model_name=config.get_resource_name(),
         model_class_name=config.get_resource_name().capitalize()
     )
 
-    _add_container(config, TemplateName.SERVICE_CONTAINER.value)
+    _add_container(
+        config,
+        TemplateName.SERVICE_CONTAINER.value,
+        Components.SERVICES.value
+    )
+
+    _add_base(
+        config,
+        service_template_path,
+        TemplateName.BASE_SERVICE.value,
+        services_folder
+    )
 
 
-def repository(config, repo_path: str) -> None:
+def repository(config: Config, repo_path: str) -> None:
     template_location = path.join(
         repository_template_path, TemplateName.REPOSITORY.value
     )
@@ -60,46 +71,79 @@ def repository(config, repo_path: str) -> None:
         model_class_name=config.get_resource_name().capitalize()
     )
 
-    _add_container(config, TemplateName.REPO_CONTAINER.value)
+    _add_container(
+        config,
+        TemplateName.REPO_CONTAINER.value,
+        Components.REPOSITORIES.value
+    )
+
+    _add_base(
+        config,
+        repository_template_path,
+        TemplateName.BASE_REPO.value,
+        repositories_folder
+    )
 
 
-def view(config, view_path: str) -> None:
+def view(config: Config, view_path: str) -> None:
     template_location = path.join(
         view_template_path, TemplateName.VIEW.value
     )
     services_folder = config.get_component(Components.SERVICES.value)
+    containers_folder = config.get_component(Components.CONTAINERS.value)
     file_from_template(
         template_location, view_path,
         services_folder=services_folder,
+        containers_folder=containers_folder,
         project=config.project_name(),
         model_name=config.get_resource_name(),
         model_class_name=config.get_resource_name().capitalize()
     )
 
-    _add_routes(config, TemplateName.ROUTES.value)
+    _add_routes(config)
 
 
-def _add_routes(config, template):
+def _add_routes(config: Config) -> None:
     template_location = path.join(
         routes_template_path, TemplateName.ROUTES.value
     )
-    routes_path = Config.find_file(root=Config.project_root(), file_name=)
+    routes_path = Config.find_file(
+        Components.ROUTES.value, root=config.project_path()
+    )
 
     append_template_to_file(
         template_location, routes_path,
-        project=config.project_name(),
-        class_name=config.get_resource_name().capitalize()
+        class_name=config.get_resource_name(),
+        model_name=config.get_resource_name(),
+        model_class_name=config.get_resource_name().capitalize()
     )
 
-def _add_container(config, template):
+
+def _add_container(config: Config, template: str, component: str) -> None:
     container_template_location = path.join(
         container_template_path, template
     )
-    container_path = config.find_components_path(
-        [Components.CONTAINERS.value]
-    )[Components.CONTAINERS.value]
+    container_path = Config.find_file(
+        component,
+        root=config.project_path(),
+        folder_path=Config.find_component(config.project_path(), Components.CONTAINERS.value)
+    )
     append_template_to_file(
         container_template_location, container_path,
         model_name=config.get_resource_name(),
         model_class_name=config.get_resource_name().capitalize()
     )
+
+
+# TODO: Base generation in different package
+def _add_base(config, template_path, template, goal_path):
+    base_template_location = path.join(
+        template_path, template
+    )
+    base_path = path.join(
+        config.project_path(),
+        goal_path,
+        Components.BASE.value + '.py'
+    )
+    if not Config.find_file(base_path):
+        file_from_template(base_template_location, base_path)
